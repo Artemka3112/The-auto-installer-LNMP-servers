@@ -19,7 +19,7 @@
     #ssl_certificate_key        sitename.ru.key;    # при использовании ssl сертификата указать путь к файлу с ключом и убрать # в начале
     #ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
 ```
-после такой записи: 
+в этой записи: 
 ```
     location / {
         # First attempt to serve request as file, then
@@ -27,8 +27,27 @@
         try_files $uri $uri/ =404;
     }
 ```
+меняем 
+```
+try_files $uri $uri/ =404;
+```
+на: 
+```
+try_files   $uri $uri/ /index.php?$query_string;
+```
+и после изменёного блока:
+```
+    location / {
+        # First attempt to serve request as file, then
+        # as directory, then fall back to displaying a 404.
+        try_files   $uri $uri/ /index.php?$query_string;
+    }
+```
 добавляем:
 ```
+    if (!-d $request_filename) {
+        rewrite     ^/(.+)/$ /$1 permanent;
+    }
     location ~* \.php$ {
             fastcgi_pass                    unix:/var/run/php/php7.3-fpm.sock;
             fastcgi_index                   index.php;
